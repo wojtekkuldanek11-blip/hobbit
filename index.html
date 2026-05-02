@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f0f1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>HabitFlow – Twoje nawyki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0b18;
+    --surface: #13132a;
+    --surface2: #1a1a35;
+    --border: rgba(255,255,255,0.07);
+    --accent: #6c63ff;
+    --accent2: #ff6b9d;
+    --accent3: #00d4aa;
+    --water: #38bdf8;
+    --text: #f0f0ff;
+    --text-dim: rgba(240,240,255,0.45);
+    --text-muted: rgba(240,240,255,0.25);
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --radius: 18px;
+    --radius-sm: 10px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+    --shadow-glow: 0 0 40px rgba(108,99,255,0.15);
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+ 
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  html { font-size: 16px; scroll-behavior: smooth; }
+ 
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+ 
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 0%, rgba(108,99,255,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 100%, rgba(255,107,157,0.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+ 
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; position: relative; z-index: 1; }
+  .screen.active { display: flex; flex-direction: column; }
+ 
+  /* ── ONBOARDING ── */
+  #screen-onboarding {
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 2rem;
+  }
+ 
+  .onboarding-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    animation: fadeSlideDown 0.6s ease both;
+  }
+ 
+  .onboarding-tagline {
+    color: var(--text-dim);
+    font-size: 1rem;
+    text-align: center;
+    animation: fadeSlideDown 0.6s 0.1s ease both;
+    letter-spacing: 0.02em;
+  }
+ 
+  .onboarding-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    box-shadow: var(--shadow), var(--shadow-glow);
+    animation: fadeSlideUp 0.6s 0.2s ease both;
+  }
+ 
+  .onboarding-card label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+ 
+  .onboarding-card input[type="text"] {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.15rem;
+    padding: 0.85rem 1rem;
+    outline: none;
+    width: 100%;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+ 
+  .onboarding-card input[type="text"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108,99,255,0.2);
+  }
+ 
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 0.9rem 1.5rem;
+    text-transform: uppercase;
+    transition: all var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+ 
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+    opacity: 0;
+    transition: opacity var(--transition);
+  }
+ 
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,99,255,0.4); }
+  .btn-primary:hover::after { opacity: 1; }
+  .btn-primary:active { transform: translateY(0); }
+ 
+  /* ── MAIN VIEW ── */
+  #screen-main { padding: 0; }
+ 
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 1.5rem 1rem;
+    position: sticky;
+    top: 0;
+    background: rgba(11,11,24,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+  }
+ 
+  .topbar-brand {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+ 
+  .greeting {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    font-weight: 300;
+  }
+ 
+  .greeting strong { color: var(--text); font-weight: 500; }
+ 
+  .main-content { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+ 
+  /* ── WEEK TABS ── */
+  .week-nav {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .week-nav::-webkit-scrollbar { display: none; }
+ 
+  .day-tab {
+    flex: 0 0 auto;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 0.7rem 1rem;
+    transition: all var(--transition);
+    min-width: 62px;
+  }
+ 
+  .day-tab .day-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+ 
+  .day-tab .day-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text);
+  }
+ 
+  .day-tab .day-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: transparent;
+    transition: background var(--transition);
+  }
+ 
+  .day-tab.has-tasks .day-dot { background: var(--accent); }
+  .day-tab.today { border-color: rgba(108,99,255,0.4); }
+  .day-tab.today .day-num { color: var(--accent); }
+ 
+  .day-tab.active {
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    border-color: transparent;
+    box-shadow: 0 4px 20px rgba(108,99,255,0.35);
+  }
+ 
+  .day-tab.active .day-label,
+  .day-tab.active .day-num { color: #fff; }
+  .day-tab.active .day-dot { background: rgba(255,255,255,0.6); }
+ 
+  /* ── DAY PANEL ── */
+  .day-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    animation: fadeSlideUp 0.3s ease both;
+  }
+ 
+  .day-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 1.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+ 
+  .day-panel-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+ 
+  .task-count-badge {
+    background: var(--surface2);
+    border-radius: 99px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    padding: 0.2rem 0.7rem;
+    font-weight: 500;
+  }
+ 
+  /* ── TASKS ── */
+  .tasks-list { padding: 0.8rem 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+ 
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.7rem 0.8rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    transition: all var(--transition);
+    animation: fadeSlideUp 0.25s ease both;
+    position: relative;
+  }
+ 
+  .task-item:hover { border-color: rgba(108,99,255,0.25); }
+ 
+  .task-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all var(--transition);
+    position: relative;
+    background: transparent;
+  }
+ 
+  .task-checkbox:checked {
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    border-color: transparent;
+  }
+ 
+  .task-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    color: #fff;
+    font-size: 12px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 700;
+  }
+ 
+  .task-name {
+    flex: 1;
+    font-size: 0.92rem;
+    transition: all var(--transition);
+  }
+ 
+  .task-name.done {
+    text-decoration: line-through;
+    color: var(--text-muted);
+  }
+ 
+  .task-time {
+    font-size: 0.72rem;
+    color: var(--accent);
+    background: rgba(108,99,255,0.12);
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-family: 'Syne', sans-serif;
+  }
+ 
+  .task-actions {
+    display: flex;
+    gap: 0.3rem;
+    opacity: 0;
+    transition: opacity var(--transition);
+  }
+ 
+  .task-item:hover .task-actions { opacity: 1; }
+ 
+  .task-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+  }
+ 
+  .task-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+  .task-btn.delete:hover { background: rgba(255,100,100,0.15); color: #ff6b6b; }
+ 
+  /* ── ADD TASK ── */
+  .add-task-form {
+    padding: 0.8rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    border-top: 1px solid var(--border);
+  }
+ 
+  .add-task-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+ 
+  .task-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.65rem 0.9rem;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+ 
+  .task-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+  }
+ 
+  .time-input {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.65rem 0.7rem;
+    outline: none;
+    width: 100%;
+    transition: border-color var(--transition);
+  }
+ 
+  .time-input:focus { border-color: var(--accent); }
+  .time-input::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
+ 
+  .btn-add {
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+  }
+ 
+  .btn-add:hover { transform: scale(1.08); box-shadow: 0 4px 16px rgba(108,99,255,0.4); }
+  .btn-add:active { transform: scale(0.96); }
+ 
+  /* ── WATER TRACKER ── */
+  .water-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+ 
+  .water-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+ 
+  .water-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+ 
+  .water-icon { font-size: 1.2rem; }
+ 
+  .water-total {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--water);
+  }
+ 
+  .water-progress-bar {
+    height: 8px;
+    background: rgba(56,189,248,0.15);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+ 
+  .water-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--water), #0ea5e9);
+    border-radius: 99px;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+  }
+ 
+  .water-progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(56,189,248,0.7);
+  }
+ 
+  .water-days {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+ 
+  .water-day-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+ 
+  .water-day-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+ 
+  .water-slider {
+    flex: 1;
+    appearance: none;
+    -webkit-appearance: none;
+    height: 6px;
+    border-radius: 99px;
+    background: rgba(56,189,248,0.15);
+    outline: none;
+    cursor: pointer;
+  }
+ 
+  .water-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--water), #0ea5e9);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(56,189,248,0.4);
+    transition: transform var(--transition);
+  }
+ 
+  .water-slider::-webkit-slider-thumb:hover { transform: scale(1.25); }
+  .water-slider::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--water), #0ea5e9);
+    cursor: pointer; border: none;
+  }
+ 
+  .water-day-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--water);
+    width: 38px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+ 
+  /* ── STATS ── */
+  .stats-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+ 
+  .stats-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+ 
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.7rem;
+  }
+ 
+  .stat-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.9rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    text-align: center;
+  }
+ 
+  .stat-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+ 
+  .stat-val.accent { color: var(--accent); }
+  .stat-val.success { color: var(--success); }
+  .stat-val.water { color: var(--water); }
+ 
+  .stat-label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+ 
+  .week-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.4rem;
+    height: 64px;
+  }
+ 
+  .chart-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+ 
+  .chart-bar {
+    width: 100%;
+    border-radius: 5px 5px 0 0;
+    background: linear-gradient(180deg, var(--accent), rgba(108,99,255,0.3));
+    min-height: 4px;
+    transition: height 0.5s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+  }
+ 
+  .chart-bar.today { background: linear-gradient(180deg, var(--accent2), rgba(255,107,157,0.3)); }
+ 
+  .chart-bar-label {
+    font-size: 0.58rem;
+    color: var(--text-muted);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+ 
+  /* ── EDIT MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+ 
+  .modal-overlay.open { display: flex; }
+ 
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: var(--shadow);
+    animation: fadeSlideUp 0.25s ease both;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+ 
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+ 
+  .modal-row { display: flex; gap: 0.5rem; }
+ 
+  .modal-actions {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: flex-end;
+    margin-top: 0.3rem;
+  }
+ 
+  .btn-ghost {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-dim);
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.65rem 1.2rem;
+    transition: all var(--transition);
+  }
+ 
+  .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+ 
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 0.65rem 1.4rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: var(--shadow);
+    z-index: 300;
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+ 
+  .toast.show { transform: translateX(-50%) translateY(0); }
+ 
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+ 
+  .empty-state-icon { font-size: 2rem; opacity: 0.4; }
+ 
+  /* ── QUICK HABITS ── */
+  .quick-habits-section {
+    padding: 0.6rem 1rem 1rem;
+    border-top: 1px solid var(--border);
+  }
+ 
+  .quick-habits-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.55rem;
+  }
+ 
+  .quick-habits-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.4rem;
+  }
+ 
+  .habit-chip {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 0.55rem 0.3rem;
+    transition: all var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+ 
+  .habit-chip::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity var(--transition);
+  }
+ 
+  .habit-chip:hover {
+    transform: translateY(-2px);
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+  }
+ 
+  .habit-chip:hover::before { opacity: 1; }
+  .habit-chip:active { transform: scale(0.96); }
+ 
+  .habit-chip[data-cat="sport"]  { --chip-c: #f97316; }
+  .habit-chip[data-cat="nauka"]  { --chip-c: #6c63ff; }
+  .habit-chip[data-cat="zdrowie"]{ --chip-c: #4ade80; }
+  .habit-chip[data-cat="relaks"] { --chip-c: #f472b6; }
+  .habit-chip[data-cat="praca"]  { --chip-c: #fbbf24; }
+  .habit-chip[data-cat="dom"]    { --chip-c: #38bdf8; }
+ 
+  .habit-chip::before {
+    background: linear-gradient(135deg, var(--chip-c, var(--accent)), color-mix(in srgb, var(--chip-c, var(--accent)) 60%, #8b5cf6));
+  }
+ 
+  .habit-chip:hover .habit-chip-icon,
+  .habit-chip:hover .habit-chip-name { color: #fff; position: relative; z-index: 1; }
+ 
+  .habit-chip-icon {
+    font-size: 1.35rem;
+    line-height: 1;
+    transition: color var(--transition);
+    position: relative;
+    z-index: 1;
+  }
+ 
+  .habit-chip-name {
+    font-size: 0.6rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.2;
+    transition: color var(--transition);
+    position: relative;
+    z-index: 1;
+  }
+ 
+  .habit-chip.added {
+    border-color: var(--chip-c, var(--accent));
+    background: color-mix(in srgb, var(--chip-c, var(--accent)) 15%, transparent);
+  }
+ 
+  .habit-chip.added .habit-chip-name { color: var(--chip-c, var(--accent)); }
+ 
+  /* ── FOOTER SPACE ── */
+  .footer-space { height: 2rem; }
+ 
+  /* ── ANIMATIONS ── */
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+ 
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+ 
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+ 
+  .pop { animation: pop 0.25s ease; }
+ 
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+ 
+  /* ── RESPONSIVE – MOBILE FIRST ── */
+ 
+  /* Dotyk: większe checkboxy i przyciski na mobile */
+  @media (max-width: 599px) {
+    html { font-size: 15px; }
+ 
+    /* Topbar kompaktowy */
+    .topbar { padding: 0.85rem 1rem 0.75rem; }
+    .topbar-brand { font-size: 1.15rem; }
+    .greeting { font-size: 0.78rem; }
+ 
+    /* Główna zawartość – mniej paddingu */
+    .main-content { padding: 0.9rem; gap: 1rem; }
+ 
+    /* Kafelki dni – zajmują całą szerokość równomiernie */
+    .week-nav { gap: 0.3rem; }
+    .day-tab { min-width: 0; flex: 1; padding: 0.6rem 0.4rem; border-radius: 10px; }
+    .day-tab .day-label { font-size: 0.55rem; }
+    .day-tab .day-num { font-size: 1.15rem; }
+ 
+    /* Panel dnia */
+    .day-panel-header { padding: 0.9rem 1rem; }
+    .day-panel-title { font-size: 0.95rem; }
+    .task-count-badge { font-size: 0.68rem; padding: 0.15rem 0.55rem; }
+ 
+    /* Lista zadań – większe touch area */
+    .tasks-list { padding: 0.6rem 0.75rem; gap: 0.45rem; }
+    .task-item { padding: 0.85rem 0.75rem; gap: 0.7rem; border-radius: 12px; }
+    .task-checkbox { width: 24px; height: 24px; min-width: 24px; border-radius: 7px; }
+    .task-checkbox:checked::after { font-size: 14px; }
+    .task-name { font-size: 0.9rem; }
+    .task-time { font-size: 0.68rem; }
+ 
+    /* Przyciski akcji zawsze widoczne na mobile (brak hover) */
+    .task-actions { opacity: 1; }
+    .task-btn { width: 34px; height: 34px; font-size: 1rem; border-radius: 9px; }
+ 
+    /* Formularz dodawania – stos na mobile */
+    .add-task-form { padding: 0.7rem 0.75rem 0.85rem; }
+    .add-task-row { flex-wrap: wrap; gap: 0.4rem; }
+    .task-input { font-size: 1rem; padding: 0.75rem 0.9rem; min-width: 0; }
+    .time-input { width: 100%; font-size: 1rem; padding: 0.75rem 0.9rem; }
+    .btn-add { width: 100%; height: 44px; font-size: 1.1rem; border-radius: var(--radius-sm); }
+ 
+    /* Kafelki nawyków – 4 kolumny na małym, 5 na średnim mobile */
+    .quick-habits-section { padding: 0.5rem 0.75rem 0.85rem; }
+    .quick-habits-grid { grid-template-columns: repeat(4, 1fr); gap: 0.35rem; }
+    .habit-chip { padding: 0.6rem 0.2rem; border-radius: 10px; }
+    .habit-chip-icon { font-size: 1.5rem; }
+    .habit-chip-name { font-size: 0.58rem; }
+ 
+    /* Water tracker */
+    .water-card { padding: 1rem 1rem; }
+    .water-slider::-webkit-slider-thumb { width: 22px; height: 22px; }
+    .water-day-row { gap: 0.6rem; }
+    .water-day-label { font-size: 0.62rem; width: 24px; }
+    .water-day-val { font-size: 0.68rem; width: 34px; }
+ 
+    /* Statystyki – 3 kolumny */
+    .stats-card { padding: 1rem; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+    .stat-val { font-size: 1.5rem; }
+    .stat-label { font-size: 0.62rem; }
+ 
+    /* Modal – pełna szerokość od dołu */
+    .modal-overlay { align-items: flex-end; padding: 0; }
+    .modal {
+      max-width: 100%;
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 1.5rem 1.2rem 2rem;
+    }
+    .modal-row { flex-direction: column; }
+    .time-input { width: 100%; }
+    .modal-actions { flex-direction: row; }
+    .btn-ghost, #edit-save-btn { flex: 1; padding: 0.8rem; font-size: 0.9rem; text-align: center; }
+ 
+    /* Toast wyżej – nie zasłania nawigacji */
+    .toast { bottom: 1.5rem; font-size: 0.8rem; padding: 0.6rem 1.2rem; max-width: 90vw; white-space: normal; text-align: center; }
+ 
+    /* Onboarding */
+    #screen-onboarding { padding: 1.5rem 1.2rem; gap: 1.5rem; }
+    .onboarding-logo { font-size: 2.2rem; }
+    .onboarding-card { padding: 1.5rem 1.2rem; }
+    .btn-primary { padding: 1rem; font-size: 1rem; }
+  }
+ 
+  /* Średni telefon / tablet pionowo */
+  @media (min-width: 400px) and (max-width: 599px) {
+    .quick-habits-grid { grid-template-columns: repeat(5, 1fr); }
+    .day-tab { padding: 0.65rem 0.5rem; }
+  }
+ 
+  /* Tablet i desktop */
+  @media (min-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(6, 1fr); }
+    #screen-onboarding { padding: 3rem; }
+    .main-content { padding: 2rem; max-width: 680px; margin: 0 auto; }
+    .topbar { padding: 1.2rem 2rem; }
+    .quick-habits-grid { grid-template-columns: repeat(8, 1fr); }
+  }
+ 
+  /* Duży ekran */
+  @media (min-width: 900px) {
+    .main-content { max-width: 800px; }
+    .quick-habits-grid { grid-template-columns: repeat(11, 1fr); }
+  }
+ 
+  /* Safe area dla iPhone z notchem */
+  @supports (padding: max(0px)) {
+    .topbar { padding-top: max(1.2rem, env(safe-area-inset-top)); }
+    .toast { bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+    .modal { padding-bottom: max(2rem, env(safe-area-inset-bottom)); }
+  }
+ 
+  /* ── PROGRESS RING on day tabs ── */
+  .day-tab .progress-wrap {
+    position: relative;
+    width: 24px;
+    height: 24px;
+  }
+  .day-tab .progress-wrap svg {
+    position: absolute;
+    inset: 0;
+    transform: rotate(-90deg);
+  }
+  .day-tab .progress-wrap circle {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+  }
+  .circle-bg { stroke: rgba(255,255,255,0.08); }
+  .circle-fg { stroke: var(--accent); transition: stroke-dashoffset 0.4s ease; }
+  .day-tab.active .circle-fg { stroke: rgba(255,255,255,0.7); }
+  .day-tab.active .circle-bg { stroke: rgba(255,255,255,0.15); }
+</style>
+</head>
+
+
+
+<body>
+ 
+<!-- ══ ONBOARDING SCREEN ══ -->
+<div class="screen active" id="screen-onboarding">
+  <div class="onboarding-logo">HabitFlow</div>
+  <div class="onboarding-tagline">Śledź nawyki. Buduj rytuały. Żyj świadomie.</div>
+  <div class="onboarding-card">
+    <label for="name-input">Jak masz na imię?</label>
+    <input type="text" id="name-input" placeholder="Wpisz swoje imię…" autocomplete="off" maxlength="30">
+    <button class="btn-primary" id="start-btn">Zacznij →</button>
+  </div>
+</div>
+ 
+<!-- ══ MAIN SCREEN ══ -->
+<div class="screen" id="screen-main">
+  <div class="topbar">
+    <div class="topbar-brand">HabitFlow</div>
+    <div class="greeting">Cześć, <strong id="topbar-name"></strong> 👋</div>
+  </div>
+ 
+  <div class="main-content">
+ 
+    <!-- WEEK TABS -->
+    <nav class="week-nav" id="week-nav"></nav>
+ 
+    <!-- DAY PANEL -->
+    <div class="day-panel" id="day-panel">
+      <div class="day-panel-header">
+        <div class="day-panel-title" id="panel-title"></div>
+        <div class="task-count-badge" id="task-badge">0 zadań</div>
+      </div>
+      <div class="tasks-list" id="tasks-list">
+        <div class="empty-state">
+          <div class="empty-state-icon">✦</div>
+          Brak zadań – dodaj pierwsze poniżej
+        </div>
+      </div>
+      <div class="quick-habits-section">
+        <div class="quick-habits-label">Szybkie propozycje</div>
+        <div class="quick-habits-grid" id="quick-habits-grid"></div>
+      </div>
+      <div class="add-task-form">
+        <div class="add-task-row">
+          <input type="text" class="task-input" id="task-name-input" placeholder="Własne zadanie…" maxlength="60">
+          <button class="btn-add" id="add-task-btn" title="Dodaj zadanie">+</button>
+        </div>
+        <input type="time" class="time-input" id="task-time-input" placeholder="Godzina (opcjonalna)">
+      </div>
+    </div>
+ 
+    <!-- WATER TRACKER -->
+    <div class="water-card">
+      <div class="water-header">
+        <div class="water-title"><span class="water-icon">💧</span> Woda – tydzień</div>
+        <div class="water-total" id="water-total-text">0 / 17.5 L</div>
+      </div>
+      <div class="water-progress-bar">
+        <div class="water-progress-fill" id="water-progress-fill" style="width:0%"></div>
+      </div>
+      <div class="water-days" id="water-days"></div>
+    </div>
+ 
+    <!-- WEEKLY STATS -->
+    <div class="stats-card">
+      <div class="stats-title">📊 Statystyki tygodniowe</div>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-val accent" id="stat-total">0</div>
+          <div class="stat-label">Zadań</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val success" id="stat-done">0</div>
+          <div class="stat-label">Ukończ.</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="stat-pct" style="color:var(--warning)">0%</div>
+          <div class="stat-label">Skuteczn.</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val water" id="stat-water">0L</div>
+          <div class="stat-label">Woda</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="stat-streak" style="color:var(--accent2)">0🔥</div>
+          <div class="stat-label">Seria</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="stat-best" style="color:var(--success)">0</div>
+          <div class="stat-label">Max/dzień</div>
+        </div>
+      </div>
+      <div class="week-chart" id="week-chart"></div>
+    </div>
+ 
+    <div class="footer-space"></div>
+  </div>
+</div>
+ 
+<!-- ══ EDIT MODAL ══ -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-title">✏️ Edytuj zadanie</div>
+    <div class="modal-row">
+      <input type="text" class="task-input" id="edit-name-input" placeholder="Nazwa zadania…" style="flex:1" maxlength="60">
+      <input type="time" class="time-input" id="edit-time-input">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="edit-cancel-btn">Anuluj</button>
+      <button class="btn-primary" id="edit-save-btn" style="flex:none;padding:0.65rem 1.4rem;text-transform:none;font-size:0.9rem">Zapisz</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast"></div>
+ 
+<script>
+(function () {
+  'use strict';
+ 
+  /* ─── STATE ─── */
+  const DAYS = ['Pon','Wt','Śr','Czw','Pt','Sob','Nd'];
+  const DAYS_FULL = ['Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota','Niedziela'];
+  const WATER_GOAL = 2.5; // litres per day
+  const WEEK_GOAL = WATER_GOAL * 7;
+ 
+  let userName = '';
+  let activeDay = 0; // 0=Mon … 6=Sun
+  let tasks = {}; // { 'YYYY-W##-D': [{id, name, time, done}] }
+  let water = {}; // { 'YYYY-W##-D': 0.0..2.5 }
+  let editingTaskId = null;
+  let editingDayKey = null;
+ 
+  /* ─── HELPERS ─── */
+  function getWeekKey() {
+    const d = new Date();
+    const jan1 = new Date(d.getFullYear(), 0, 1);
+    const week = Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+    return `${d.getFullYear()}-W${String(week).padStart(2,'0')}`;
+  }
+ 
+  function getDayKey(dayIndex) {
+    return `${getWeekKey()}-D${dayIndex}`;
+  }
+ 
+  function getTodayIndex() {
+    const d = new Date().getDay(); // 0=Sun
+    return d === 0 ? 6 : d - 1; // convert to Mon=0
+  }
+ 
+  function uid() {
+    return Math.random().toString(36).slice(2,10);
+  }
+ 
+  function save() {
+    localStorage.setItem('hf_tasks', JSON.stringify(tasks));
+    localStorage.setItem('hf_water', JSON.stringify(water));
+    localStorage.setItem('hf_user', userName);
+  }
+ 
+  function load() {
+    userName = localStorage.getItem('hf_user') || '';
+    tasks = JSON.parse(localStorage.getItem('hf_tasks') || '{}');
+    water = JSON.parse(localStorage.getItem('hf_water') || '{}');
+  }
+ 
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+ 
+  /* ─── SCREEN NAVIGATION ─── */
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+ 
+  /* ─── WEEK NAVIGATION ─── */
+  function buildWeekNav() {
+    const nav = document.getElementById('week-nav');
+    nav.innerHTML = '';
+    const today = getTodayIndex();
+    for (let i = 0; i < 7; i++) {
+      const key = getDayKey(i);
+      const dayTasks = tasks[key] || [];
+      const done = dayTasks.filter(t => t.done).length;
+      const total = dayTasks.length;
+      const pct = total > 0 ? done / total : 0;
+      const r = 9;
+      const circ = 2 * Math.PI * r;
+      const offset = circ * (1 - pct);
+      const tab = document.createElement('button');
+      tab.className = `day-tab${i === today ? ' today' : ''}${i === activeDay ? ' active' : ''}${total > 0 ? ' has-tasks' : ''}`;
+      tab.innerHTML = `
+        <span class="day-label">${DAYS[i]}</span>
+        <div class="progress-wrap">
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <circle class="circle-bg" cx="12" cy="12" r="${r}" />
+            <circle class="circle-fg" cx="12" cy="12" r="${r}"
+              stroke-dasharray="${circ}"
+              stroke-dashoffset="${offset}" />
+          </svg>
+        </div>
+      `;
+      tab.addEventListener('click', () => {
+        activeDay = i;
+        buildWeekNav();
+        renderDayPanel();
+      });
+      nav.appendChild(tab);
+    }
+  }
+ 
+  /* ─── DAY PANEL ─── */
+  function renderDayPanel() {
+    const key = getDayKey(activeDay);
+    const dayTasks = tasks[key] || [];
+    const today = getTodayIndex();
+ 
+    document.getElementById('panel-title').textContent =
+      `${DAYS_FULL[activeDay]}${activeDay === today ? ' · Dziś' : ''}`;
+ 
+    const badge = document.getElementById('task-badge');
+    const done = dayTasks.filter(t => t.done).length;
+    badge.textContent = `${done}/${dayTasks.length} zadań`;
+ 
+    const list = document.getElementById('tasks-list');
+    if (dayTasks.length === 0) {
+      list.innerHTML = `<div class="empty-state">
+        <div class="empty-state-icon">✦</div>
+        Brak zadań – wybierz propozycję lub dodaj własne
+      </div>`;
+      buildQuickHabits();
+      return;
+    }
+ 
+    // sort by time
+    const sorted = [...dayTasks].sort((a,b) => {
+      if (!a.time && !b.time) return 0;
+      if (!a.time) return 1;
+      if (!b.time) return -1;
+      return a.time.localeCompare(b.time);
+    });
+ 
+    list.innerHTML = '';
+    sorted.forEach(task => {
+      const item = document.createElement('div');
+      item.className = 'task-item';
+      item.innerHTML = `
+        <input type="checkbox" class="task-checkbox" data-id="${task.id}" ${task.done ? 'checked' : ''}>
+        <span class="task-name${task.done ? ' done' : ''}">${task.icon ? task.icon+' ' : ''}${escHtml(task.name)}</span>
+        ${task.time ? `<span class="task-time">${task.time}</span>` : ''}
+        <div class="task-actions">
+          <button class="task-btn" data-edit="${task.id}" title="Edytuj">✏️</button>
+          <button class="task-btn delete" data-del="${task.id}" title="Usuń">🗑</button>
+        </div>
+      `;
+      list.appendChild(item);
+    });
+ 
+    // checkbox events
+    list.querySelectorAll('.task-checkbox').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const id = cb.dataset.id;
+        const t = (tasks[key] || []).find(x => x.id === id);
+        if (t) {
+          t.done = cb.checked;
+          save();
+          renderDayPanel();
+          buildWeekNav();
+          renderStats();
+          if (t.done) showToast('✅ Zadanie ukończone!');
+        }
+      });
+    });
+ 
+    // edit events
+    list.querySelectorAll('[data-edit]').forEach(btn => {
+      btn.addEventListener('click', () => openEditModal(key, btn.dataset.edit));
+    });
+ 
+    // delete events
+    list.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tasks[key] = (tasks[key] || []).filter(x => x.id !== btn.dataset.del);
+        save();
+        renderDayPanel();
+        buildWeekNav();
+        renderStats();
+        showToast('🗑 Zadanie usunięte');
+      });
+    });
+ 
+    buildQuickHabits();
+  }
+ 
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+ 
+  /* ─── ADD TASK ─── */
+  document.getElementById('add-task-btn').addEventListener('click', addTask);
+  document.getElementById('task-name-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addTask();
+  });
+ 
+  function addTask() {
+    const nameEl = document.getElementById('task-name-input');
+    const timeEl = document.getElementById('task-time-input');
+    const name = nameEl.value.trim();
+    if (!name) { nameEl.focus(); return; }
+    const key = getDayKey(activeDay);
+    if (!tasks[key]) tasks[key] = [];
+    tasks[key].push({ id: uid(), name, time: timeEl.value || '', done: false });
+    nameEl.value = '';
+    timeEl.value = '';
+    save();
+    renderDayPanel();
+    buildWeekNav();
+    renderStats();
+    showToast('✨ Zadanie dodane!');
+  }
+ 
+  /* ─── EDIT MODAL ─── */
+  function openEditModal(dayKey, taskId) {
+    editingDayKey = dayKey;
+    editingTaskId = taskId;
+    const t = (tasks[dayKey] || []).find(x => x.id === taskId);
+    if (!t) return;
+    document.getElementById('edit-name-input').value = t.name;
+    document.getElementById('edit-time-input').value = t.time || '';
+    document.getElementById('edit-modal').classList.add('open');
+    setTimeout(() => document.getElementById('edit-name-input').focus(), 50);
+  }
+ 
+  document.getElementById('edit-cancel-btn').addEventListener('click', () => {
+    document.getElementById('edit-modal').classList.remove('open');
+  });
+ 
+  document.getElementById('edit-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('edit-modal'))
+      document.getElementById('edit-modal').classList.remove('open');
+  });
+ 
+  document.getElementById('edit-save-btn').addEventListener('click', () => {
+    const name = document.getElementById('edit-name-input').value.trim();
+    if (!name) return;
+    const t = (tasks[editingDayKey] || []).find(x => x.id === editingTaskId);
+    if (t) {
+      t.name = name;
+      t.time = document.getElementById('edit-time-input').value || '';
+      save();
+      renderDayPanel();
+      buildWeekNav();
+      renderStats();
+      showToast('✅ Zadanie zaktualizowane!');
+    }
+    document.getElementById('edit-modal').classList.remove('open');
+  });
+ 
+  /* ─── WATER ─── */
+  function buildWaterSliders() {
+    const container = document.getElementById('water-days');
+    container.innerHTML = '';
+    const today = getTodayIndex();
+    for (let i = 0; i < 7; i++) {
+      const key = getDayKey(i);
+      const val = water[key] || 0;
+      const row = document.createElement('div');
+      row.className = 'water-day-row';
+      row.innerHTML = `
+        <span class="water-day-label">${DAYS[i]}</span>
+        <input type="range" class="water-slider" min="0" max="250" step="10" value="${Math.round(val*100)}" data-day="${i}">
+        <span class="water-day-val" id="wval-${i}">${val.toFixed(1)}L</span>
+      `;
+      // dynamic gradient on slider
+      const slider = row.querySelector('.water-slider');
+      setSliderGradient(slider, val * 100 / 250);
+      slider.addEventListener('input', () => {
+        const litres = slider.value / 100;
+        water[getDayKey(i)] = litres;
+        document.getElementById(`wval-${i}`).textContent = litres.toFixed(1)+'L';
+        setSliderGradient(slider, slider.value / 250);
+        save();
+        updateWaterProgress();
+        renderStats();
+      });
+      container.appendChild(row);
+    }
+    updateWaterProgress();
+  }
+ 
+  function setSliderGradient(slider, pct) {
+    const p = Math.min(1, Math.max(0, pct));
+    slider.style.background = `linear-gradient(to right, #38bdf8 0%, #0ea5e9 ${p*100}%, rgba(56,189,248,0.15) ${p*100}%, rgba(56,189,248,0.15) 100%)`;
+  }
+ 
+  function updateWaterProgress() {
+    let total = 0;
+    for (let i = 0; i < 7; i++) {
+      total += water[getDayKey(i)] || 0;
+    }
+    const pct = Math.min(1, total / WEEK_GOAL);
+    document.getElementById('water-progress-fill').style.width = (pct * 100) + '%';
+    document.getElementById('water-total-text').textContent = `${total.toFixed(1)} / ${WEEK_GOAL}L`;
+  }
+ 
+  /* ─── STATS ─── */
+  function renderStats() {
+    let total = 0, done = 0, streak = 0, bestDay = 0;
+    let waterTotal = 0;
+    const today = getTodayIndex();
+    const chartData = [];
+ 
+    for (let i = 0; i < 7; i++) {
+      const key = getDayKey(i);
+      const dayTasks = tasks[key] || [];
+      const dayDone = dayTasks.filter(t => t.done).length;
+      total += dayTasks.length;
+      done += dayDone;
+      bestDay = Math.max(bestDay, dayDone);
+      waterTotal += water[key] || 0;
+ 
+      // streak: consecutive days with all done (up to today)
+      if (i <= today && dayTasks.length > 0 && dayDone === dayTasks.length) {
+        streak++;
+      } else if (i <= today) {
+        streak = 0; // reset if not all done
+      }
+ 
+      chartData.push({ label: DAYS[i], total: dayTasks.length, done: dayDone, isToday: i === today });
+    }
+ 
+    const pct = total > 0 ? Math.round(done / total * 100) : 0;
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-done').textContent = done;
+    document.getElementById('stat-pct').textContent = pct + '%';
+    document.getElementById('stat-water').textContent = waterTotal.toFixed(1)+'L';
+    document.getElementById('stat-streak').textContent = streak + '🔥';
+    document.getElementById('stat-best').textContent = bestDay;
+ 
+    // chart
+    const chart = document.getElementById('week-chart');
+    chart.innerHTML = '';
+    const maxVal = Math.max(1, ...chartData.map(d => d.total));
+    chartData.forEach(d => {
+      const wrap = document.createElement('div');
+      wrap.className = 'chart-bar-wrap';
+      const height = d.total > 0 ? Math.max(8, Math.round(d.total / maxVal * 56)) : 4;
+      wrap.innerHTML = `
+        <div class="chart-bar${d.isToday ? ' today' : ''}" style="height:${height}px" title="${d.done}/${d.total}"></div>
+        <div class="chart-bar-label">${d.label}</div>
+      `;
+      chart.appendChild(wrap);
+    });
+  }
+ 
+  /* ─── ONBOARDING ─── */
+  document.getElementById('start-btn').addEventListener('click', startApp);
+  document.getElementById('name-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') startApp();
+  });
+ 
+  function startApp() {
+    const name = document.getElementById('name-input').value.trim();
+    if (!name) { document.getElementById('name-input').focus(); return; }
+    userName = name;
+    save();
+    launchMain();
+  }
+ 
+  function launchMain() {
+    document.getElementById('topbar-name').textContent = userName;
+    activeDay = getTodayIndex();
+    showScreen('screen-main');
+    buildWeekNav();
+    renderDayPanel();
+    buildWaterSliders();
+    renderStats();
+  }
+ 
+  /* ─── NOTIFICATIONS ─── */
+  function requestNotifications() {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(perm => {
+        if (perm === 'granted') {
+          scheduleNotifications();
+        }
+      });
+    } else if (Notification.permission === 'granted') {
+      scheduleNotifications();
+    }
+  }
+ 
+  function scheduleNotifications() {
+    const today = getTodayIndex();
+    const key = getDayKey(today);
+    const dayTasks = (tasks[key] || []).filter(t => !t.done && t.time);
+    dayTasks.forEach(task => {
+      const [h, m] = task.time.split(':').map(Number);
+      const now = new Date();
+      const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
+      const delay = target - now;
+      if (delay > 0 && delay < 24 * 3600 * 1000) {
+        setTimeout(() => {
+          new Notification('HabitFlow ⚡', {
+            body: `Czas na: ${task.name}`,
+            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">✦</text></svg>'
+          });
+        }, delay);
+      }
+    });
+  }
+ 
+  /* ─── QUICK HABITS ─── */
+  const HABIT_PRESETS = [
+    { icon: '🏋️', name: 'Trening', cat: 'sport' },
+    { icon: '🧘', name: 'Joga', cat: 'sport' },
+    { icon: '🚴', name: 'Rower', cat: 'sport' },
+    { icon: '🏃', name: 'Bieganie', cat: 'sport' },
+    { icon: '🏊', name: 'Pływanie', cat: 'sport' },
+    { icon: '📚', name: 'Czytanie', cat: 'nauka' },
+    { icon: '✏️', name: 'Nauka', cat: 'nauka' },
+    { icon: '🧠', name: 'Kurs online', cat: 'nauka' },
+    { icon: '🗣️', name: 'Języki', cat: 'nauka' },
+    { icon: '🎸', name: 'Instrument', cat: 'nauka' },
+    { icon: '🥗', name: 'Dieta', cat: 'zdrowie' },
+    { icon: '💊', name: 'Witaminy', cat: 'zdrowie' },
+    { icon: '🛌', name: 'Sen 8h', cat: 'zdrowie' },
+    { icon: '🧘‍♀️', name: 'Medytacja', cat: 'relaks' },
+    { icon: '📓', name: 'Dziennik', cat: 'relaks' },
+    { icon: '🎨', name: 'Kreatywność', cat: 'relaks' },
+    { icon: '🎵', name: 'Muzyka', cat: 'relaks' },
+    { icon: '💼', name: 'Praca głęboka', cat: 'praca' },
+    { icon: '📧', name: 'Skrzynka', cat: 'praca' },
+    { icon: '📅', name: 'Planowanie', cat: 'praca' },
+    { icon: '💰', name: 'Finanse', cat: 'praca' },
+    { icon: '🧹', name: 'Sprzątanie', cat: 'dom' },
+    { icon: '🌱', name: 'Rośliny', cat: 'dom' },
+    { icon: '🍳', name: 'Gotowanie', cat: 'dom' },
+    { icon: '👨‍👩‍👦', name: 'Rodzina', cat: 'dom' },
+    { icon: '📵', name: 'Detoks tel.', cat: 'relaks' },
+    { icon: '🌅', name: 'Wczesny ranek', cat: 'zdrowie' },
+    { icon: '🚶', name: 'Spacer', cat: 'sport' },
+    { icon: '🙏', name: 'Wdzięczność', cat: 'relaks' },
+    { icon: '🤸', name: 'Rozciąganie', cat: 'sport' },
+    { icon: '📖', name: 'Biblia', cat: 'relaks' },
+    { icon: '🧊', name: 'Zimny prysznic', cat: 'zdrowie' },
+    { icon: '💻', name: 'Programowanie', cat: 'nauka' },
+  ];
+ 
+  function buildQuickHabits() {
+    const grid = document.getElementById('quick-habits-grid');
+    if (!grid) return;
+    const key = getDayKey(activeDay);
+    const dayTasks = tasks[key] || [];
+    const existingNames = dayTasks.map(t => t.name);
+ 
+    grid.innerHTML = '';
+    HABIT_PRESETS.forEach(habit => {
+      const alreadyAdded = existingNames.includes(habit.name);
+      const chip = document.createElement('button');
+      chip.className = `habit-chip${alreadyAdded ? ' added' : ''}`;
+      chip.dataset.cat = habit.cat;
+      chip.title = `Dodaj: ${habit.name}`;
+      chip.innerHTML = `
+        <span class="habit-chip-icon">${habit.icon}</span>
+        <span class="habit-chip-name">${habit.name}</span>
+      `;
+      chip.addEventListener('click', () => {
+        if (alreadyAdded) return; // already in list
+        const k = getDayKey(activeDay);
+        if (!tasks[k]) tasks[k] = [];
+        tasks[k].push({ id: uid(), name: habit.name, time: '', done: false, icon: habit.icon });
+        save();
+        renderDayPanel();
+        buildWeekNav();
+        renderStats();
+        showToast(`${habit.icon} ${habit.name} dodane!`);
+      });
+      grid.appendChild(chip);
+    });
+  }
+ 
+  /* ─── INIT ─── */
+  load();
+  if (userName) {
+    launchMain();
+  } else {
+    showScreen('screen-onboarding');
+    setTimeout(() => document.getElementById('name-input').focus(), 300);
+  }
+  setTimeout(requestNotifications, 2000);
+ 
+})();
+</script>
+
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+
+</body>
+</html>
+ 
