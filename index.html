@@ -1620,16 +1620,35 @@
     });
   }
  
-  /* ─── INIT ─── */
+ /* ─── INIT ─── */
   load();
+ 
+  // Podepnij przycisk powiadomień
+  window._hfRequestNotif = async () => {
+    const btn = document.getElementById('notif-btn');
+    await requestNotifications();
+    if (Notification.permission === 'granted') {
+      btn.style.opacity = '1';
+      btn.title = 'Powiadomienia włączone ✓';
+    }
+  };
+ 
   if (userName) {
     launchMain();
   } else {
     showScreen('screen-onboarding');
     setTimeout(() => document.getElementById('name-input').focus(), 300);
   }
-  setTimeout(requestNotifications, 2000);
  
+  // Auto-rejestracja SW i planowanie (cicho, bez prośby o zgodę przy starcie)
+  if (Notification.permission === 'granted') {
+    const btn = document.getElementById('notif-btn');
+    if (btn) btn.style.opacity = '1';
+    registerSW().then(() => scheduleNotifications());
+  }
+
+ 
+})();
 })();
 </script>
 
